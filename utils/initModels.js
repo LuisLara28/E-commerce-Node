@@ -5,9 +5,9 @@ const { Product } = require("../models/product.model");
 const { ProductImg } = require("../models/productImg.model");
 const { ProductInOrder } = require("../models/productInOrder.model");
 const { ProductInCart } = require("../models/productInCart.model");
+const { ProductSold } = require("../models/productSold.model");
 const { Sale } = require("../models/sales.model");
 const { User } = require("../models/user.model");
-const { ProductSold } = require("../models/productSold.model");
 
 const userRelations = () => {
   // 1 User <--> Product M

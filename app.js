@@ -21,6 +21,8 @@ const { AppError } = require("./utils/appError");
 // Init app
 const app = express();
 
+app.enable("trust proxy");
+
 app.use(xss());
 
 app.use(
@@ -37,15 +39,16 @@ app.set("view-engine", "pug");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use("*", cors());
+// Implement CORS
+app.use("*", cors()); //Access-Control-Allow-Origin *
 
 app.use(cookieParser());
 
 // Endpoints
-app.use("/", viewsRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/products", productsRouter);
 app.use("/api/v1/orders", ordersRouter);
+app.use("/", viewsRouter);
 
 app.use("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

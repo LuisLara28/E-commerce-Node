@@ -1,3 +1,5 @@
+const { ref, uploadBytes } = require("firebase/storage");
+
 // Models
 const { Product } = require("../models/product.model");
 const { ProductImg } = require("../models/productImg.model");
@@ -7,6 +9,7 @@ const { User } = require("../models/user.model");
 const { AppError } = require("../utils/appError");
 const { catchAsync } = require("../utils/catchAsync");
 const { filterObj } = require("../utils/filterObj");
+const { firebaseStorage } = require("../utils/firebase");
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
   const products = await Product.findAll({
@@ -43,7 +46,7 @@ exports.getProductDetails = catchAsync(async (req, res, next) => {
 
 exports.createProduct = catchAsync(async (req, res, next) => {
   const { name, description, price, quantity, category } = req.body;
-  const userId = req.currentUser.id;
+  const { currentUser } = req;
 
   const newProduct = await Product.create({
     name,
@@ -51,10 +54,23 @@ exports.createProduct = catchAsync(async (req, res, next) => {
     price,
     quantity,
     category,
-    userId,
+    userId: currentUser.id,
   });
 
-  await ProductImg.create({ productId: newProduct.id, imgPath: req.file.path });
+  //save Img path
+  const imgsPromises = req.files.productImgs.map(async (img) => {
+    const imgName = `/img/products/${newProduct.id}-${currentUser.id}-${img.originalname}`;
+    const imgRef = ref(firebaseStorage, imgName);
+
+    const result = await uploadBytes(imgRef, img.buffer);
+
+    await ProductImg.create({
+      productId: newProduct.id,
+      imgPath: result.metadata.fullPath,
+    });
+
+    await Promise.all(imgsPromises);
+  });
 
   res.status(201).json({ status: "success", data: { newProduct } });
 });

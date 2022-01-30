@@ -20,8 +20,9 @@ const ProductImg = db.define(
     },
     status: {
       type: DataTypes.STRING(20),
-      allowNull: false,
-      defaultValue: "available",
+      allowNull: "false",
+      // active | deleted | unavailable
+      defaultValue: "active",
     },
   },
   { timestamps: false }

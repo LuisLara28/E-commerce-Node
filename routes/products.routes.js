@@ -19,7 +19,8 @@ const {
   createProductValidations,
   validateResult,
 } = require("../middlewares/validators.middleware");
-const { multerUpload } = require("../utils/multer");
+
+const { multerUpload } = require("../utils/multer"); // multipart/form-data
 
 const router = express.Router();
 
@@ -31,7 +32,8 @@ router
   .route("/")
   .get(getAllProducts)
   .post(
-    multerUpload.single("productImg"),
+    multerUpload.fields([{ name: "productImgs", maxCount: 2 }]),
+    // multerUpload.single("productImg"),
     createProductValidations,
     validateResult,
     createProduct

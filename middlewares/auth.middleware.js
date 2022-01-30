@@ -75,18 +75,15 @@ exports.protectOwnerData = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { currentUser } = req;
 
-  const user = await User.findOne({ where: { id } });
-
-  if (!user) {
+  if (!id) {
     return next(new AppError("User not found", 404));
   }
 
   // console.log(user.id);
   // console.log(currentUser);
-  if (user.id !== currentUser.id) {
+  if (id !== currentUser.id) {
     return next(new AppError("You do not own this user", 401));
   }
 
-  req.user = user;
   next();
 });
