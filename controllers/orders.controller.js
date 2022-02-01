@@ -213,9 +213,6 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
         include: [
           {
             model: Product,
-            attributes: {
-              exclude: ["id", "userId", "price", "quantity", "status"],
-            },
           },
         ],
       },
@@ -249,9 +246,9 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
       where: { id: productInCart.productId },
     });
     //and substract the requested qty from the product qty
-    const { quantity } = product;
+    const newQty = product.quantity - productInCart.quantity;
 
-    await product.update({ quantity: +quantity - +productInCart.quantity });
+    await product.update({ quantity: newQty });
     //Create productInOrder, pass orderId, productId, qty, price
     await ProductInOrder.create({
       orderId: newOrder.id,
@@ -260,14 +257,22 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
       price: productInCart.price,
     });
   });
-  console.log(currentUser.email);
 
+  await Promise.all(promises);
+
+  const products = await ProductInOrder.findAll({
+    where: { orderId: newOrder.id, status: "available" },
+    include: [{ model: Product }],
+  });
   //2da parte
   // Send email to the user that purchased the order
   // The email must contain the total price and the list of products that were purchased
 
-  await new Email(currentUser.email).sendOrder(newOrder.totalPrice);
-  await Promise.all(promises);
+  await new Email(currentUser.email).sendOrder(
+    products[0].product,
+    newOrder.totalPrice,
+    currentUser.name
+  );
 
   res.status(200).json({ status: "success" });
 });
@@ -275,8 +280,18 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
 //Create a controller function that gets all user's orders
 //the resposes must include all products that purchased
 exports.getUsersOrders = catchAsync(async (req, res, next) => {
-  const orders = await Order.findAll();
-  console.log(orders);
+  const { currentUser } = req;
 
-  res.status(200).json({ status: "success" });
+  const orders = await Order.findAll({
+    where: { userId: currentUser.id },
+    include: [
+      {
+        model: ProductInOrder,
+        where: { status: "available" },
+        include: [{ model: Product }],
+      },
+    ],
+  });
+
+  res.status(200).json({ status: "success", orders });
 });

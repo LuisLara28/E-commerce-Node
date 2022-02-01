@@ -60,9 +60,11 @@ class Email {
     await this.send("welcome", "New account!", { username, email });
   }
 
-  async sendOrder(totalPrice) {
+  async sendOrder(products, totalPrice, name) {
     await this.send("receipt", "Order Confirmation!", {
+      products,
       totalPrice,
+      name,
     });
   }
 }
