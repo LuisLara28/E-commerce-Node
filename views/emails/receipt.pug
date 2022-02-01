@@ -1,1 +1,13 @@
 extends base
+
+block receiptContent
+    p Hi 
+    p You successfully purchased the following products:
+
+    table.body(role='presentation' cellspacing='0' cellpadding='0' border='0')
+        tbody
+            tr
+                 
+                th Total Price
+            tr 
+                td.align-center #{totalPrice}

@@ -10,6 +10,8 @@ const { filterObj } = require("../utils/filterObj");
 const { AppError } = require("../utils/appError");
 const { formatUserCart } = require("../utils/queryFormat");
 const { ProductInOrder } = require("../models/productInOrder.model");
+const { User } = require("../models/user.model");
+const { Email } = require("../utils/email");
 
 exports.getUserCart = catchAsync(async (req, res, next) => {
   const { currentUser } = req;
@@ -208,6 +210,14 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
         model: ProductInCart,
         attributes: { exclude: ["cartId", "status"] },
         where: { status: "active" },
+        include: [
+          {
+            model: Product,
+            attributes: {
+              exclude: ["id", "userId", "price", "quantity", "status"],
+            },
+          },
+        ],
       },
     ],
   });
@@ -250,11 +260,13 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
       price: productInCart.price,
     });
   });
+  console.log(currentUser.email);
 
   //2da parte
   // Send email to the user that purchased the order
   // The email must contain the total price and the list of products that were purchased
 
+  await new Email(currentUser.email).sendOrder(newOrder.totalPrice);
   await Promise.all(promises);
 
   res.status(200).json({ status: "success" });
@@ -262,3 +274,9 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
 
 //Create a controller function that gets all user's orders
 //the resposes must include all products that purchased
+exports.getUsersOrders = catchAsync(async (req, res, next) => {
+  const orders = await Order.findAll();
+  console.log(orders);
+
+  res.status(200).json({ status: "success" });
+});

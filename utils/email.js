@@ -2,7 +2,6 @@ const nodemailer = require("nodemailer");
 const pug = require("pug");
 const path = require("path");
 const { htmlToText } = require("html-to-text");
-const { basename } = require("path");
 
 const dotenv = require("dotenv");
 
@@ -58,12 +57,14 @@ class Email {
   }
 
   async sendWelcome(username, email) {
-    //...
-
     await this.send("welcome", "New account!", { username, email });
   }
 
-  async sendOrder(products, totalPrice, name) {}
+  async sendOrder(totalPrice) {
+    await this.send("receipt", "Order Confirmation!", {
+      totalPrice,
+    });
+  }
 }
 
 module.exports = { Email };
