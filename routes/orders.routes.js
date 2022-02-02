@@ -7,6 +7,7 @@ const {
   updateProductCart,
   purchaseOrder,
   getUsersOrders,
+  getOrderById,
 } = require("../controllers/orders.controller");
 
 // Middlewares
@@ -20,6 +21,7 @@ const router = express.Router();
 
 router.use(protectSession);
 
+router.get("/:id", getOrderById);
 // Get user's cart
 router.get("/get-cart", getUserCart);
 

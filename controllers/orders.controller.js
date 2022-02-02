@@ -295,3 +295,16 @@ exports.getUsersOrders = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ status: "success", orders });
 });
+
+exports.getOrderById = catchAsync(async (req, res, next) => {
+  // Find the order by a given ID
+  const { id } = req.params;
+
+  const order = await Order.findOne({
+    where: { id },
+  });
+  // Must include the products of that order
+  // Must get the total price of the order and the prices of the products and how much the user bought
+
+  res.status(200).json({ status: "success" });
+});

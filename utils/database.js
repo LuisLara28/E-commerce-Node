@@ -14,6 +14,15 @@ const db = new Sequelize({
   database: process.env.DB, //base de datos existentes a la que me quiero conectar esta ya tiene que estar creada
   port: process.env.DB_PORT, //puerto por default
   logging: false,
+  dialectOptions:
+    process.env.NODE_ENV === "production"
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : null,
 });
 
 module.exports = { db };
