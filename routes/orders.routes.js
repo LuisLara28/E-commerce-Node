@@ -6,7 +6,7 @@ const {
   getUserCart,
   updateProductCart,
   purchaseOrder,
-  getUsersOrders,
+  getAllOrders,
   getOrderById,
 } = require("../controllers/orders.controller");
 
@@ -21,7 +21,9 @@ const router = express.Router();
 
 router.use(protectSession);
 
-router.get("/:id", getOrderById);
+// Get user's orders
+router.get("/", getAllOrders);
+
 // Get user's cart
 router.get("/get-cart", getUserCart);
 
@@ -39,9 +41,9 @@ router.patch(
 // Remove product from cart
 
 // Create order
-router.patch("/purchase-order", purchaseOrder);
+router.get("/purchase-order", purchaseOrder);
 
-// Get user's orders
-router.get("/get-user-orders", getUsersOrders);
+//Get order by id
+router.get("/:id", getOrderById);
 
 module.exports = { ordersRouter: router };

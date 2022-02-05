@@ -208,7 +208,6 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
     include: [
       {
         model: ProductInCart,
-        attributes: { exclude: ["cartId", "status"] },
         where: { status: "active" },
         include: [
           {
@@ -220,10 +219,8 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
   });
 
   if (!cart) {
-    return next(new AppError("cart not found", 404));
+    return next(new AppError("Cart not found", 404));
   }
-
-  const { totalPrice, userId, productsInCarts } = cart;
 
   //Set cart status to 'purchased'
   await cart.update({ status: "purchased" });
@@ -231,24 +228,23 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
   //Create a new order
 
   const newOrder = await Order.create({
-    totalPrice,
+    totalPrice: cart.totalPrice,
     date: new Date().toLocaleString(),
-    userId,
+    userId: currentUser.id,
   });
 
-  // [Promise]
   //Loop through the product array, for each product
-  //set productInCart status to 'purchased', search fro cartId and productId
-  const promises = productsInCarts.map(async (productInCart) => {
+  const promises = cart.productsInCarts.map(async (productInCart) => {
+    //set productInCart status to 'purchased'
     await productInCart.update({ status: "purchased" });
     //Look for the Product (productId),
-    const product = await Product.findOne({
+    const updatedProduct = await Product.findOne({
       where: { id: productInCart.productId },
     });
     //and substract the requested qty from the product qty
-    const newQty = product.quantity - productInCart.quantity;
+    const newQty = +updatedProduct.quantity - +productInCart.quantity;
 
-    await product.update({ quantity: newQty });
+    await updatedProduct.update({ quantity: newQty });
     //Create productInOrder, pass orderId, productId, qty, price
     await ProductInOrder.create({
       orderId: newOrder.id,
@@ -259,17 +255,12 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
   });
 
   await Promise.all(promises);
-
-  const products = await ProductInOrder.findAll({
-    where: { orderId: newOrder.id, status: "available" },
-    include: [{ model: Product }],
-  });
   //2da parte
   // Send email to the user that purchased the order
   // The email must contain the total price and the list of products that were purchased
 
   await new Email(currentUser.email).sendOrder(
-    products[0].product,
+    cart.productsInCarts,
     newOrder.totalPrice,
     currentUser.name
   );
@@ -279,11 +270,23 @@ exports.purchaseOrder = catchAsync(async (req, res, next) => {
 
 //Create a controller function that gets all user's orders
 //the resposes must include all products that purchased
-exports.getUsersOrders = catchAsync(async (req, res, next) => {
+exports.getAllOrders = catchAsync(async (req, res, next) => {
   const { currentUser } = req;
 
   const orders = await Order.findAll({
     where: { userId: currentUser.id },
+    include: [{ model: ProductInOrder }],
+  });
+
+  res.status(200).json({ status: "success", data: { orders } });
+});
+
+exports.getOrderById = catchAsync(async (req, res, next) => {
+  // Find the order by a given ID
+  const { id } = req.params;
+
+  const order = await Order.findOne({
+    where: { id, status: "active" },
     include: [
       {
         model: ProductInOrder,
@@ -292,19 +295,9 @@ exports.getUsersOrders = catchAsync(async (req, res, next) => {
       },
     ],
   });
-
-  res.status(200).json({ status: "success", orders });
-});
-
-exports.getOrderById = catchAsync(async (req, res, next) => {
-  // Find the order by a given ID
-  const { id } = req.params;
-
-  const order = await Order.findOne({
-    where: { id },
-  });
+  console.log(order);
   // Must include the products of that order
   // Must get the total price of the order and the prices of the products and how much the user bought
-
+  if (!order) return next(new AppError("The order does not exist", 404));
   res.status(200).json({ status: "success" });
 });

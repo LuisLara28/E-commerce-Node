@@ -2,20 +2,23 @@ extends base
 
 block receiptContent
     p Hi #{name}
+    p Your order was a total of$#{totalPrice}
     p You successfully purchased the following products:
-    
 
-    table.body(role='presentation' cellspacing='0' cellpadding='0' border='0')
-        tbody
-            tr
-                th Product 
-                th Quantity
-                th Price
-            each product in products
-                tr 
-                    td.align-center #{product.name}
-                    td.align-center #{product.quantity}
-                    td.align-center #{product.price}
-            tr 
-                td.align-center Total 
-                td.align-center #{totalPrice}
+    ul 
+        each product in products
+            li #{product.product.name} / #{product.quantity} / $#{product.price}
+    //- table.body(role='presentation' cellspacing='0' cellpadding='0' border='0')
+    //-     tbody
+    //-         tr
+    //-             th Product 
+    //-             th Quantity
+    //-             th Price
+    //-         each product in products
+    //-             tr 
+    //-                 td.align-center #{product.name}
+    //-                 td.align-center #{product.quantity}
+    //-                 td.align-center #{product.price}
+    //-         tr 
+    //-             td.align-center Total 
+    //-             td.align-center #{totalPrice}
