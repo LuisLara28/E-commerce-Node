@@ -10,15 +10,15 @@ const ProductCard = ({ product }) => {
   // Refs
   const requestedQtyInputRef = useRef();
 
-  const onAddToCartHandler = async () => {
+  const onAddToCartHandler = () => {
     const qty = +requestedQtyInputRef.current.value;
 
     if (qty < 0) return;
 
     // TODO: SEND API REQUEST
-    await axios.post(
+    axios.post(
       `${process.env.REACT_APP_API_URL}/orders/add-product-to-cart`,
-      { id: product.id, quantity: product.quantity, price: product.price }
+      product
     );
   };
 
