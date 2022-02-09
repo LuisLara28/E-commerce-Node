@@ -19,6 +19,7 @@ const { protectSession } = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
+router.post("/add-product-to-cart", addProductToCart);
 router.use(protectSession);
 
 // Get user's orders
@@ -28,7 +29,6 @@ router.get("/", getAllOrders);
 router.get("/get-cart", getUserCart);
 
 // Add product to cart
-router.post("/add-product-to-cart", addProductToCart);
 
 // Update cart product quantity
 router.patch(

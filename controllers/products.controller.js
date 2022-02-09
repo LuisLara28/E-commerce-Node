@@ -58,19 +58,19 @@ exports.createProduct = catchAsync(async (req, res, next) => {
   });
 
   //save Img path
-  const imgsPromises = req.files.productImgs.map(async (img) => {
-    const imgName = `/img/products/${newProduct.id}-${currentUser.id}-${img.originalname}`;
-    const imgRef = ref(firebaseStorage, imgName);
+  // const imgsPromises = req.files.productImgs.map(async (img) => {
+  //   const imgName = `/img/products/${newProduct.id}-${currentUser.id}-${img.originalname}`;
+  //   const imgRef = ref(firebaseStorage, imgName);
 
-    const result = await uploadBytes(imgRef, img.buffer);
+  //   const result = await uploadBytes(imgRef, img.buffer);
 
-    await ProductImg.create({
-      productId: newProduct.id,
-      imgPath: result.metadata.fullPath,
-    });
+  //   await ProductImg.create({
+  //     productId: newProduct.id,
+  //     imgPath: result.metadata.fullPath,
+  //   });
 
-    await Promise.all(imgsPromises);
-  });
+  //   await Promise.all(imgsPromises);
+  // });
 
   res.status(201).json({ status: "success", data: { newProduct } });
 });

@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const { Op } = require("sequelize");
+const { promisify } = require("util");
 
 // require('crypto').randomBytes(64).toString('hex')
 
@@ -31,7 +32,9 @@ exports.protectSession = catchAsync(async (req, res, next) => {
   }
 
   // Validate token
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  if (!decoded) return next(new AppError("Invalid token", 401));
 
   const user = await User.findOne({
     attributes: { exclude: ["password"] },
@@ -51,8 +54,6 @@ exports.protectSession = catchAsync(async (req, res, next) => {
 exports.protectProductOwner = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { currentUser } = req;
-
-  console.log(currentUser);
 
   // Find product by id
   // SELECT * FROM products WHERE status = 'active' OR status = 'soldOut'
@@ -83,8 +84,8 @@ exports.protectOwnerData = catchAsync(async (req, res, next) => {
 
   // console.log(user.id);
   // console.log(currentUser);
-  if (id !== currentUser.id) {
-    return next(new AppError("You do not own this user", 401));
+  if (+currentUser.id !== +id) {
+    return next(new AppError("You do not own this account", 401));
   }
 
   next();

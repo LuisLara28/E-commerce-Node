@@ -24,26 +24,19 @@ const {
 
 const router = express.Router();
 
-// Get - Get user profile
+// Post - Create new user
+router.post("/", createUserValidations, validateResult, createUser);
 
+router.post("/login", loginUserValidations, validateResult, loginUser);
+
+router.use(protectSession);
 // Get - Get user by id
 // Patch - Update user profile (email, name)
 // Delete - Disable user account
 router
   .route("/:id")
-  .get(protectSession, getUserById)
-  .patch(
-    protectSession,
-    protectOwnerData,
-    updateUserValidations,
-    validateResult,
-    updateUser
-  )
+  .get(getUserById)
+  .patch(protectOwnerData, updateUserValidations, validateResult, updateUser)
   .delete(protectSession, protectOwnerData, disableUserAccount);
-
-// Post - Create new user
-router.post("/", createUserValidations, validateResult, createUser);
-
-router.post("/login", loginUserValidations, validateResult, loginUser);
 
 module.exports = { userRouter: router };

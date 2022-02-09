@@ -299,5 +299,5 @@ exports.getOrderById = catchAsync(async (req, res, next) => {
   // Must include the products of that order
   // Must get the total price of the order and the prices of the products and how much the user bought
   if (!order) return next(new AppError("The order does not exist", 404));
-  res.status(200).json({ status: "success" });
+  res.status(200).json({ status: "success", data: { order } });
 });

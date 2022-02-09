@@ -13,11 +13,11 @@ class Email {
   }
 
   createTransport() {
-    if (process.env.NODE === "production") {
+    if (process.env.NODE_ENV === "production") {
       return nodemailer.createTransport({
         service: "SendGrid",
         auth: {
-          user: process.env.SENGRID_NAME,
+          user: process.env.SENDGRID_NAME,
           pass: process.env.SENDGRID_API_KEY,
         },
       });

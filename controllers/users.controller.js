@@ -16,7 +16,7 @@ exports.loginUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   // If user exists with given email
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({ where: { email, status: "available" } });
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return next(new AppError("Credentials are not valid", 404));
@@ -33,15 +33,17 @@ exports.loginUser = catchAsync(async (req, res, next) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 60 * 60 * 1000
     ),
   };
-
+  // M E R N
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
   // http -> https
   res.cookie("jwt", token, cookieOptions);
 
+  user.password = undefined;
+
   res.status(200).json({
     status: "success",
-    data: { user },
+    data: { user, token },
   });
 });
 
